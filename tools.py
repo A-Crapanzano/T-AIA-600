@@ -1,6 +1,17 @@
-import requests
+import csv
 
-response = requests.get("https://gutendex.com/books/11")
-data = response.json()
+book_id = 11
 
-print(data)
+with open("data/pg_catalog.csv", encoding="utf-8") as f:
+    reader = csv.DictReader(f)
+    
+    for row in reader:
+        if row["Text#"] == str(book_id):
+            info = {
+                "id": row["Text#"],
+                "title": row["Title"],
+                "authors": row["Authors"],
+                "bookshelves": row["Bookshelves"],
+            }
+            print(info)
+            break
