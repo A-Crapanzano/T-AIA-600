@@ -2,9 +2,14 @@ import argparse
 import csv
 import os
 import requests
+import spacy
+
+# Chargement du modèle spaCy une seule fois
+nlp = spacy.load("en_core_web_sm")
 
 
 def get_info(book_id):
+    """Renvoie les métadonnées d'un livre depuis le catalogue CSV."""
     with open("data/pg_catalog.csv", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -22,6 +27,9 @@ def download_book(book_id):
     os.makedirs("books", exist_ok=True)
     path = f"books/{book_id}.txt"
 
+    if os.path.exists(path):
+        return path
+
     url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.txt"
     response = requests.get(url)
     response.raise_for_status()
@@ -30,6 +38,34 @@ def download_book(book_id):
         f.write(response.text)
 
     return path
+
+
+def clean_gutenberg_text(text):
+    """Retire l'en-tête et le pied juridique Project Gutenberg."""
+    start_marker = "*** START"
+    end_marker = "*** END"
+
+    start_index = text.find(start_marker)
+    end_index = text.find(end_marker)
+
+    if start_index == -1 or end_index == -1:
+        return text
+
+    start_index = text.find("\n", start_index) + 1
+    return text[start_index:end_index].strip()
+
+
+def get_book_tokens(book_id):
+    """Télécharge, nettoie et tokenise un livre. Renvoie la liste des mots."""
+    path = download_book(book_id)
+
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
+
+    text = clean_gutenberg_text(text)
+    doc = nlp(text)
+
+    return [token.text.lower() for token in doc if token.is_alpha]
 
 
 if __name__ == "__main__":
