@@ -4,12 +4,10 @@ import os
 import requests
 import spacy
 
-# Chargement du modèle spaCy une seule fois
 nlp = spacy.load("en_core_web_sm")
 
 
 def get_info(book_id):
-    """Renvoie les métadonnées d'un livre depuis le catalogue CSV."""
     with open("data/pg_catalog.csv", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -41,7 +39,6 @@ def download_book(book_id):
 
 
 def clean_gutenberg_text(text):
-    """Retire l'en-tête et le pied juridique Project Gutenberg."""
     start_marker = "*** START"
     end_marker = "*** END"
 
@@ -56,7 +53,6 @@ def clean_gutenberg_text(text):
 
 
 def get_book_tokens(book_id):
-    """Télécharge, nettoie et tokenise un livre. Renvoie la liste des mots."""
     path = download_book(book_id)
 
     with open(path, encoding="utf-8") as f:

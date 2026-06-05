@@ -3,7 +3,6 @@ from tools import get_book_tokens
 
 
 def lexdiv(book_id):
-    """Calcule les métriques de diversité lexicale d'un livre."""
     words = get_book_tokens(book_id)
     counts = Counter(words)
 
