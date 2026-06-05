@@ -2,6 +2,7 @@ import argparse
 import json
 from lexdiv import lexdiv
 from entities import entities
+from similar import similar
 
 
 def print_json(data):
@@ -12,6 +13,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Bookworm NLP engine")
     parser.add_argument("--lexdiv", type=int, help="Lexical diversity metrics")
     parser.add_argument("--entities", type=int, help="Extract characters and locations")
+    parser.add_argument("--similar", type=int, help="Find 5 most similar books")
 
     args = parser.parse_args()
 
@@ -20,3 +22,6 @@ if __name__ == "__main__":
 
     if args.entities is not None:
         print_json(entities(args.entities))
+
+    if args.similar is not None:
+        print_json(similar(args.similar))
