@@ -1,6 +1,11 @@
 import argparse
+import json
 from lexdiv import lexdiv
 from entities import entities
+
+
+def print_json(data):
+    print(json.dumps(data, indent=2, ensure_ascii=False))
 
 
 if __name__ == "__main__":
@@ -11,7 +16,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.lexdiv is not None:
-        print(lexdiv(args.lexdiv))
+        print_json(lexdiv(args.lexdiv))
 
     if args.entities is not None:
-        print(entities(args.entities))
+        print_json(entities(args.entities))

@@ -4,8 +4,14 @@ import os
 import requests
 import spacy
 
-nlp = spacy.load("en_core_web_sm")
+_nlp = None
 
+
+def get_nlp():
+    global _nlp
+    if _nlp is None:
+        _nlp = spacy.load("en_core_web_sm")
+    return _nlp
 
 def get_info(book_id):
     with open("data/pg_catalog.csv", encoding="utf-8") as f:
@@ -59,8 +65,7 @@ def get_book_tokens(book_id):
         text = f.read()
 
     text = clean_gutenberg_text(text)
-    doc = nlp(text)
-
+    doc = get_nlp()(text)
     return [token.text.lower() for token in doc if token.is_alpha]
 
 
