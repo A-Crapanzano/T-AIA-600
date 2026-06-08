@@ -3,6 +3,7 @@ import json
 from lexdiv import lexdiv
 from entities import entities
 from similar import similar
+from summarize import summarize
 
 
 def print_json(data):
@@ -14,6 +15,8 @@ if __name__ == "__main__":
     parser.add_argument("--lexdiv", type=int, help="Lexical diversity metrics")
     parser.add_argument("--entities", type=int, help="Extract characters and locations")
     parser.add_argument("--similar", type=int, help="Find 5 most similar books")
+    parser.add_argument("--summarize", type=int, help="Summarize a book")
+
 
     args = parser.parse_args()
 
@@ -25,3 +28,6 @@ if __name__ == "__main__":
 
     if args.similar is not None:
         print_json(similar(args.similar))
+        
+    if args.summarize is not None:
+        print_json(summarize(args.summarize))
