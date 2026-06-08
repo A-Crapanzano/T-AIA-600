@@ -1,27 +1,57 @@
-from similar import load_book_text, CORPUS
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+from tools import download_book, clean_gutenberg_text, get_nlp
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.decomposition import LatentDirichletAllocation
 
-ids = list(CORPUS.keys())
-texts = [load_book_text(bid) for bid in ids]
+path = download_book(11)
+with open(path, encoding="utf-8") as f:
+    text = f.read()
+text = clean_gutenberg_text(text)
 
-vectorizer = TfidfVectorizer(
-    stop_words="english",
-    max_features=5000,
-    min_df=2,
-    max_df=0.95,
-    ngram_range=(1, 2),
-    sublinear_tf=True,
+sections = []
+current_section = []
+for line in text.split("\n"):
+    if line.startswith("CHAPTER"):
+        if current_section:
+            sections.append("\n".join(current_section))
+        current_section = []
+    else:
+        current_section.append(line)
+if current_section:
+    sections.append("\n".join(current_section))
+chapters = sections[1:]
+
+nlp = get_nlp()
+cleaned_chapters = []
+for chapter in chapters:
+    doc = nlp(chapter)
+    clean_words = [
+        token.lemma_.lower()
+        for token in doc
+        if token.is_alpha
+        and not token.is_stop
+        and len(token) > 2
+    ]
+    cleaned_chapters.append(clean_words)
+
+chapter_strings = [" ".join(chapter) for chapter in cleaned_chapters]
+
+EXTRA_STOPWORDS = ["alice", "say", "go", "come", "know", "like", "think", "little", "look", "begin", "way"]
+
+vectorizer = CountVectorizer(
+    max_features=500,
+    stop_words=EXTRA_STOPWORDS,
 )
-matrix = vectorizer.fit_transform(texts)
 
-target_index = ids.index(11)
-sims = cosine_similarity(matrix[target_index], matrix).flatten()
+# ← ligne manquante !
+matrix = vectorizer.fit_transform(chapter_strings)
 
-pairs = sorted(
-    [(sims[i], CORPUS[ids[i]]) for i in range(len(ids))],
-    reverse=True,
-)
+lda = LatentDirichletAllocation(n_components=4, random_state=42)
+lda.fit(matrix)
 
-for score, title in pairs:
-    print(f"{score:.4f}  {title}")
+print(f"Taille de la matrice : {matrix.shape}")
+print(f"LDA entraîné ! Nombre de topics : {lda.n_components}")
+
+feature_names = vectorizer.get_feature_names_out()
+for topic_idx, topic in enumerate(lda.components_):
+    top_words = [feature_names[i] for i in topic.argsort()[-10:][::-1]]
+    print(f"Topic {topic_idx + 1} : {top_words}")
