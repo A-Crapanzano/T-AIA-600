@@ -5,6 +5,8 @@ from entities import entities
 from similar import similar
 from summarize import summarize
 from topics import topics
+from card import card
+
 
 def print_json(data):
     print(json.dumps(data, indent=2, ensure_ascii=False))
@@ -17,6 +19,8 @@ if __name__ == "__main__":
     parser.add_argument("--similar", type=int, help="Find 5 most similar books")
     parser.add_argument("--summarize", type=int, help="Summarize a book")
     parser.add_argument("--topics", type=int, help="Extract main topics")
+    parser.add_argument("--card", type=int, help="Generate full book card")
+
 
 
     args = parser.parse_args()
@@ -35,3 +39,6 @@ if __name__ == "__main__":
         
     if args.topics is not None:
         print_json(topics(args.topics))
+        
+    if args.card is not None:
+        print_json(card(args.card))

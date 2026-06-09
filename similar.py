@@ -4,7 +4,6 @@ from sklearn.metrics.pairwise import cosine_similarity
 from tools import download_book, clean_gutenberg_text
 
 
-# Notre annuaire des 21 livres du corpus du sujet
 CORPUS = {
     11: "Alice's Adventures in Wonderland",
     12: "Through the Looking-Glass",
@@ -40,11 +39,9 @@ def load_book_text(book_id):
 
 def similar(book_id):
     """Renvoie les 5 livres les plus similaires au livre donné."""
-    # Étape 2 : charger les textes des 21 livres
     ids = list(CORPUS.keys())
     texts = [load_book_text(bid) for bid in ids]
 
-    # Étape 3 : vectoriser tout le corpus en TF-IDF
     vectorizer = TfidfVectorizer(
     stop_words="english",
     max_features=2000,
@@ -53,16 +50,12 @@ def similar(book_id):
 )
     matrix = vectorizer.fit_transform(texts)
 
-    # Étape 4 : trouver la position du livre cible dans la liste
     target_index = ids.index(book_id)
 
-    # Étape 5 : calculer la similarité avec tous les autres
     similarities = cosine_similarity(matrix[target_index], matrix).flatten()
 
-    # Étape 6 : trier les indices par similarité décroissante
     sorted_indices = similarities.argsort()[::-1]
 
-    # Étape 7 : extraire les 5 meilleurs titres (en excluant le livre cible)
     result = []
     for idx in sorted_indices:
         if idx == target_index:
