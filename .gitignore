@@ -1,7 +1,13 @@
-# Created by venv; see https://docs.python.org/3/library/venv.html
-venv/
+# Python-generated files
 __pycache__/
-*.pyc
-.DS_Store
-books/
-cache/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+.bookcache/
+.ruff_cache/
