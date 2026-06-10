@@ -5,12 +5,14 @@ import sys
 from src.fetch import get_book_text
 from src.lexdiv import advanced_diversity, lexdiv
 from src.similar import similar, style_similar
+from src.summarize import summarize
 from src.topics import topics
 
 COMMANDS = {
     "lexdiv": lambda book_id: lexdiv(get_book_text(book_id)),
     "topics": lambda book_id: topics(get_book_text(book_id)),
     "similar": lambda book_id: similar(book_id),
+    "summarize": lambda book_id: summarize(book_id),
 }
 
 
