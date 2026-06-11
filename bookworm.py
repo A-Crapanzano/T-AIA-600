@@ -3,6 +3,7 @@ import json
 import sys
 
 from src.fetch import get_book_text
+from src.card import card
 from src.entities import entities
 from src.lexdiv import advanced_diversity, lexdiv
 from src.similar import similar, style_similar
@@ -15,6 +16,7 @@ COMMANDS = {
     "entities": lambda book_id: entities(book_id),
     "similar": lambda book_id: similar(book_id),
     "summarize": lambda book_id: summarize(book_id),
+    "card": lambda book_id: card(book_id),
 }
 
 
