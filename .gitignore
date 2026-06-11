@@ -1,7 +1,13 @@
-venv/
+# Python-generated files
 __pycache__/
-*.pyc
-.DS_Store
-books/
-cache/
-data/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+.bookcache/
+.ruff_cache/

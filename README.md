@@ -1,257 +1,157 @@
-# 📚 Bookworm — Moteur NLP pour les livres Project Gutenberg
+# Bookworm
 
-Bookworm est un outil CLI Python qui effectue des analyses NLP sur des livres issus de Project Gutenberg. Il génère des "fiches de livres" structurées contenant des métriques lexicales, une modélisation thématique, de la reconnaissance d'entités nommées, un résumé extractif et des recommandations de livres similaires.
+Génère des **fiches de lecture** à partir de livres du
+[Project Gutenberg](https://www.gutenberg.org/) : diversité lexicale, thèmes,
+personnages et lieux, résumé, et recommandations de livres similaires.
 
-Réalisé dans le cadre du module Epitech T-AIA-600.
-
----
-
-## 🚀 Installation
-
-### 1. Cloner le dépôt
-
-```bash
-git clone https://github.com/A-Crapanzano/T-AIA-600.git
-cd T-AIA-600
-```
-
-### 2. Créer un environnement virtuel
-
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
-### 3. Installer les dépendances
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Télécharger le modèle anglais spaCy
-
-```bash
-python -m spacy download en_core_web_sm
-```
-
-### 5. Télécharger le tokenizer NLTK
-
-```bash
-python -c "import nltk; nltk.download('punkt'); nltk.download('punkt_tab')"
-```
-
-### 6. Télécharger le catalogue CSV Gutenberg
-
-Télécharger le catalogue ici :
-https://www.gutenberg.org/cache/epub/feeds/pg_catalog.csv
-
-Le placer dans le dossier `data/` à la racine du projet.
-
----
-
-## 📁 Structure du projet
-
-```
-T-AIA-600/
-├── bookworm.py       # Point d'entrée principal (CLI)
-├── tools.py          # Téléchargement, nettoyage, tokenisation
-├── lexdiv.py         # Métriques de diversité lexicale
-├── entities.py       # Reconnaissance d'entités nommées (NER)
-├── similar.py        # Similarité entre livres (TF-IDF + cosinus)
-├── summarize.py      # Résumé extractif (LexRank)
-├── topics.py         # Modélisation thématique (LDA)
-├── card.py           # Agrégateur de fiche complète
-├── data/
-│   └── pg_catalog.csv
-├── books/            # Textes téléchargés (généré automatiquement)
-├── requirements.txt
-└── README.md
-```
-
----
-
-## 🛠️ Utilisation
-
-Toutes les commandes suivent ce schéma :
-
-```bash
-python bookworm.py --<option> <id_livre>
-```
-
-Où `<id_livre>` est l'identifiant Project Gutenberg (ex: `11` pour Alice au Pays des Merveilles).
-
-### `--info` — Métadonnées du livre
-
-```bash
-python tools.py --info 11
-```
-
-Retourne un dictionnaire avec l'id, le titre, les auteurs et les rayons.
-
-### `--download` — Télécharger un livre
-
-```bash
-python tools.py --download 11
-```
-
-Télécharge le livre au format texte brut UTF-8 dans le dossier `books/`.
-
-### `--lexdiv` — Diversité lexicale
-
-```bash
-python bookworm.py --lexdiv 11
-```
-
-Retourne 6 métriques de diversité lexicale :
-
-```json
-{
-  "tok": 26683,
-  "typ": 2551,
-  "hap": 1104,
-  "ttr": 0.0956,
-  "mwl": 4.0,
-  "mwf": 10.46
-}
-```
-
-### `--entities` — Reconnaissance d'entités nommées
-
-```bash
-python bookworm.py --entities 11
-```
-
-Retourne les personnages et lieux extraits du livre :
-
-```json
-{
-  "characters": ["Alice", "Bill", "Gryphon", "Hatter", ...],
-  "locations": ["Wonderland", "Paris", "Rome", ...]
-}
-```
-
-### `--topics` — Modélisation thématique
-
-```bash
-python bookworm.py --topics 11
-```
-
-Retourne les 10 mots les plus représentatifs de chaque topic extrait via LDA :
-
-```json
-{
-  "1": ["rabbit", "door", "mouse", ...],
-  "2": ["queen", "gryphon", "turtle", ...],
-  "3": ["hatter", "dormouse", "tea", ...],
-  "4": ["king", "duchess", "moral", ...]
-}
-```
-
-### `--summarize` — Résumé extractif
-
-```bash
-python bookworm.py --summarize 11
-```
-
-Retourne un résumé court du livre sous forme de quelques phrases.
-
-### `--similar` — Livres similaires
-
-```bash
-python bookworm.py --similar 11
-```
-
-Retourne les 5 livres les plus similaires du corpus, triés par similarité décroissante :
-
-```json
+```console
+$ uv run bookworm.py --similar 1661        # The Adventures of Sherlock Holmes
 [
-  "Through the Looking-Glass",
-  "The Adventures of Sherlock Holmes",
-  "Frankenstein; Or, The Modern Prometheus",
-  "The War of the Worlds",
-  "The Jungle Book"
+  "The Return of Sherlock Holmes",
+  "The Memoirs of Sherlock Holmes",
+  "Poirot Investigates",
+  "The Murder of Roger Ackroyd",
+  "The Big Four"
 ]
 ```
 
-### `--card` — Fiche complète
+## Installation
+
+Nécessite **Python 3.12 ou 3.13**.
 
 ```bash
-python bookworm.py --card 11
+uv sync
 ```
 
-Agrège toutes les analyses en un seul dictionnaire structuré.
+Sans [uv](https://docs.astral.sh/uv/) :
 
----
+```bash
+python3.12 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+```
 
-## 🧠 Méthodologie
+Le modèle spaCy (`en_core_web_md`) s'installe automatiquement dans les deux cas.
 
-### Diversité lexicale (`--lexdiv`)
+## Commandes
 
-Calculée directement à partir du texte tokenisé avec spaCy. Les tokens sont filtrés pour ne garder que les tokens de mots alphabétiques. Toutes les métriques sont calculées sur les tokens en minuscules.
+```bash
+uv run bookworm.py --<commande> <ID>       # ou: python bookworm.py … dans un venv activé
+```
 
-**Métriques :** tok, typ, hap, ttr, mwl, mwf.
-
-**Limite :** Le TTR diminue mécaniquement à mesure que la longueur du texte augmente, rendant les comparaisons entre livres peu fiables. Des métriques avancées (MTLD, MATTR) corrigeraient ce biais.
-
----
-
-### Reconnaissance d'entités nommées (`--entities`)
-
-Utilise le modèle `en_core_web_sm` de spaCy pour détecter les entités nommées. Seuls les labels `PERSON` sont conservés pour les personnages, et `GPE`/`LOC` pour les lieux. Un seuil de fréquence (`min_occurrences=2`) filtre les faux positifs.
-
-**Limite :** Le modèle léger produit des faux positifs sur les textes littéraires (titres de chapitres, mots capitalisés en début de phrase). Un modèle plus grand (`en_core_web_lg`) améliorerait la précision mais dépasse la contrainte légèreté du projet.
-
----
-
-### Modélisation thématique (`--topics`)
-
-Le livre est découpé en chapitres grâce aux marqueurs `CHAPTER`. Chaque chapitre est lemmatisé et nettoyé avec spaCy, puis vectorisé avec `CountVectorizer`. LDA (`sklearn`) est entraîné avec 4 topics et `random_state=42` pour la reproductibilité.
-
-**Pourquoi LDA plutôt que LSA ?** LDA est un modèle probabiliste qui produit des topics plus interprétables. LSA est plus rapide mais les topics sont plus difficiles à lire.
-
-**Limite :** Le nombre de topics (4) est un choix manuel. Une analyse du score de cohérence permettrait de trouver le nombre optimal automatiquement.
-
----
-
-### Résumé extractif (`--summarize`)
-
-Utilise la bibliothèque `sumy` avec l'algorithme LexRank. LexRank sélectionne les phrases en fonction de leur similarité avec les autres phrases du texte (approche basée sur les graphes). Testé contre LSA et Luhn — LexRank a produit les résultats les plus lisibles sur les textes littéraires narratifs.
-
-**Limite :** Les méthodes extractives copient les phrases telles quelles. Sans reformulation, certaines phrases manquent de contexte lues isolément. Les méthodes abstractives (BART, T5) produiraient des résumés plus naturels mais sont interdites par les contraintes du projet.
-
----
-
-### Similarité entre livres (`--similar`)
-
-Les livres sont vectorisés avec TF-IDF (`TfidfVectorizer` avec `ngram_range=(1,2)`, `sublinear_tf=True`). La similarité cosinus est calculée entre le livre cible et les 21 livres du corpus.
-
-**Pourquoi TF-IDF plutôt que les embeddings ?** TF-IDF est léger et tourne en local. Les sentence embeddings (BERT, Sentence-Transformers) captureraient la similarité sémantique plus précisément mais nécessitent des modèles lourds, interdits par le projet.
-
-**Limite :** TF-IDF compare des vocabulaires, pas des sens. Deux livres traitant du même thème avec des vocabulaires différents peuvent avoir un score de similarité faible.
-
----
-
-## 📦 Corpus de livres
-
-La commande `--similar` fonctionne sur un corpus fixe de 21 livres de Project Gutenberg répartis en 3 genres :
-
-| Genre | Livres |
+| Commande | Sortie |
 |---|---|
-| Enfants / Jeunes Adultes | Alice, Through the Looking-Glass, Peter Pan, Wizard of Oz, Secret Garden, Treasure Island, Jungle Book |
-| Crime, Mystère & Thriller | Sherlock Holmes (x3), Poirot Investigates, Roger Ackroyd, The Big Four, Mysterious Affair at Styles |
-| Science-Fiction & Fantasy | Time Machine, War of the Worlds, Frankenstein, Doctor Moreau, 20 000 Lieues, Dracula, Call of Cthulhu |
+| `--lexdiv <ID>` | diversité lexicale (`tok`, `typ`, `hap`, `ttr`, `mwl`, `mwf`) |
+| `--topics <ID>` | 10 mots-clés par section |
+| `--entities <ID>` | personnages et lieux |
+| `--summarize <ID>` | résumé en quelques phrases |
+| `--similar <ID>` | les 5 livres les plus proches |
+| `--card <ID>` | la fiche complète |
 
----
+`<ID>` est l'identifiant Gutenberg (`11` = *Alice*, `345` = *Dracula*).
 
-## 📋 Dépendances
+Deux options : `--full` (avec `--lexdiv`, ajoute MATTR/MTLD) et `--style` (avec
+`--similar`, compare par style d'écriture plutôt que par thème).
 
-- `spacy` + `en_core_web_sm` — Pipeline NLP (tokenisation, lemmatisation, NER)
-- `scikit-learn` — Vectorisation TF-IDF, similarité cosinus, LDA
-- `sumy` + `nltk` — Résumé extractif
-- `requests` — Requêtes HTTP vers Project Gutenberg
+## Méthodes
 
----
+Le pipeline et les choix de conception de chaque commande.
 
-## 👤 Auteur
+### lexdiv — diversité lexicale
 
-Alexandre Crapanzano — Epitech Marseille, MSc Architecte de Systèmes d'Information (2025/2026)
+```mermaid
+flowchart LR
+  A[texte] --> B[tokenisation] --> C["comptage<br/>tok · typ · hap"] --> D["ratios<br/>ttr · mwl · mwf"]
+  D -.->|--full| E["MATTR · MTLD<br/>robustes à la longueur"]
+```
+
+Le **TTR** (mots uniques / total) dépend de la longueur du texte, ce qui le rend
+peu comparable d'un livre à l'autre. **MATTR** (TTR moyen sur une fenêtre
+glissante) et **MTLD** (longueur moyenne avant que le TTR passe sous 0,72) n'en
+dépendent pas ; ils sont activés par `--full`.
+
+### topics — thèmes par section
+
+```mermaid
+flowchart LR
+  A[texte] --> B["découpage en sections<br/>chapitres, sinon blocs égaux"] --> C[TF-IDF par section] --> D["top 10 mots<br/>par section"]
+```
+
+Découpage par chapitres (regex multi-format ; à défaut, blocs de taille égale),
+puis **TF-IDF** où les « documents » sont les sections du livre : un mot ressort
+s'il est fréquent dans une section mais rare dans les autres. Les mots trop
+fréquents sont écartés par le TF-IDF lui-même, sans liste de stop-words.
+
+### entities — personnages & lieux
+
+```mermaid
+flowchart LR
+  A[texte] --> B["découpage<br/>limite spaCy"] --> C["spaCy NER<br/>en_core_web_md"] --> D["filtres<br/>chapitres · possessifs · conflits · fréquence"] --> E["characters<br/>locations"]
+```
+
+NER avec **spaCy `en_core_web_md`** (≈40 Mo, CPU). Le texte est découpé en blocs
+(limite de longueur de spaCy), puis les entités sont normalisées et filtrées
+(chapitres, possessifs, conflits personnage/lieu, fréquence minimale). La
+précision baisse sur l'anglais ancien (fiction du 19ᵉ).
+
+### summarize — résumé extractif
+
+```mermaid
+flowchart LR
+  A[texte] --> B[phrases] --> C[TF-IDF par phrase] --> D["graphe<br/>cosinus entre phrases"] --> E[PageRank] --> F[5 phrases centrales]
+```
+
+Résumé **extractif** par **TextRank** : les phrases sont reliées par leur
+similarité cosinus, et PageRank en extrait les plus centrales. S'appuie sur le
+TF-IDF et le cosinus de `similar`. Le résumé reprend des phrases existantes sans
+les reformuler ; une approche qui reformule demanderait un modèle entraîné bien
+plus lourd. `sumy` (LexRank) donnait un résultat équivalent mais ajoutait nltk et
+ses téléchargements.
+
+### similar — livres proches
+
+```mermaid
+flowchart LR
+  A["21 livres + cible"] --> B[TF-IDF par livre] --> C[cosinus vs cible] --> D[tri décroissant] --> E[5 titres]
+```
+
+Chaque livre devient un vecteur TF-IDF ; on compare par **cosinus** (l'angle,
+donc insensible à la longueur des livres). Chaque livre garde ses mots les plus
+forts **à lui** (`top_n` par livre) plutôt qu'un vocabulaire global, ce qui
+préserve les termes signature. Option `--style` : similarité de **style**
+(méthode de Burrows sur les mots-outils) au lieu du thème.
+
+### card — assemblage
+
+```mermaid
+flowchart LR
+  A[id] --> B[info] & C[lexdiv] & D[topics] & E[entities] & F[summary] & G[similar]
+  B & C & D & E & F & G --> H[fiche JSON]
+```
+
+`--card` rappelle les cinq analyses (plus les métadonnées du livre) et renvoie la
+fiche complète.
+
+### Choix transverses
+
+- **Téléchargement** : `urllib` de la bibliothèque standard (pas de dépendance
+  externe pour une simple requête GET) ; détection des marqueurs Project
+  Gutenberg pour retirer l'en-tête/pied de page légaux.
+- **Cache** : décorateur `@cached` — les opérations coûteuses (téléchargement,
+  NER, résumé) sont calculées une fois puis relues depuis `.bookcache/`.
+
+> Python 3.14 n'est pas supporté : spaCy 3.8 ne fournit pas encore de paquet pour
+> cette version.
+
+## Structure
+
+```
+bookworm.py        CLI
+src/fetch.py       téléchargement Gutenberg + cache
+src/text.py        tokenisation
+src/lexdiv.py      diversité lexicale
+src/topics.py      thèmes par section (TF-IDF)
+src/entities.py    personnages et lieux (spaCy)
+src/summarize.py   résumé extractif (TextRank)
+src/similar.py     similarité par thème et par style
+src/card.py        assemblage de la fiche
+```
